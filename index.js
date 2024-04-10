@@ -42,15 +42,15 @@ app.put("/update", async (req, res) => {
   });
 });
 
-app.delete("/delete", async (req, res) => {
-  const selectedProduct = await Product.find({ _id: req.query.id });
+app.delete("/delete/:id", async (req, res) => {
+  const selectedProduct = await Product.find({ _id: req.params.id }); // req.params is a id getting from url
   if (selectedProduct.length === 0) {
     res.status(404).send({
       status: "error",
       message: "Please provide a valid product id",
     });
   } else {
-    await Product.deleteOne({ _id: req.query.id });
+    await Product.deleteOne({ _id: req.params.id });
 
     res.send({
       status: "success",
@@ -58,6 +58,25 @@ app.delete("/delete", async (req, res) => {
       deletedProduct: selectedProduct,
     });
   }
+});
+
+app.get("/search/:key", async (req, res) => {
+  let productData = await Product.find({
+    $or: [
+      { name: { $regex: req.params.key } },
+      { brand: { $regex: req.params.key } },
+      { category: { $regex: req.params.key } },
+    ],
+  });
+
+  productData.length > 0
+    ? res.send({
+        message: "Search data is available",
+        productData,
+      })
+    : res.send({
+        message: "Search not found",
+      });
 });
 
 const port = 5000;
