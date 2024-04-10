@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 require("./config");
 
 const Product = require("./product");
@@ -77,6 +78,23 @@ app.get("/search/:key", async (req, res) => {
     : res.send({
         message: "Search not found",
       });
+});
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads");
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.fieldname + "-" + Date.now() + ".jpg");
+    },
+  }),
+}).single("user_file");
+
+app.post("/upload", upload, (req, res) => {
+  res.send({
+    message: "Upload",
+  });
 });
 
 const port = 5000;
